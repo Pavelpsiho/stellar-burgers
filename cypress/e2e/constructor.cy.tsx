@@ -1,10 +1,16 @@
-const testUrl = 'http://localhost:4000';
+const SELECTORS = {
+  buns: '[data-cy=buns]',
+  mains: '[data-cy=mains]',
+  sauces: '[data-cy=sauces]',
+  modals: '#modals',
+  overlay: '#overlay',
+};
 
 describe('Тесты e2e для главной страницы и модального окна', function () {
   beforeEach(() => {
     cy.intercept('GET', '/api/ingredients', { fixture: 'ingredients.json' });
     cy.intercept('GET', '/api/auth/user', { fixture: 'user.json' });
-    cy.visit(testUrl);
+    cy.visit('/');
   });
 
   afterEach(() => {
@@ -13,9 +19,9 @@ describe('Тесты e2e для главной страницы и модаль�
   });
 
   it('Добавляем ингридиенты в конструктор', function () {
-    cy.get(`[data-cy=${'buns'}]`).as('buns');
-    cy.get('[data-cy=mains]').as('mains');
-    cy.get('[data-cy=sauces]').as('sauces');
+    cy.get(SELECTORS.buns).as('buns');
+    cy.get(SELECTORS.mains).as('mains');
+    cy.get(SELECTORS.sauces).as('sauces');
 
     cy.get('@buns').contains('Добавить').click();
     cy.get('@mains').contains('Добавить').click();
@@ -38,32 +44,32 @@ describe('Тесты e2e для главной страницы и модаль�
   });
 
   it('Проверка модального окна: отсутствие', function () {
-    cy.get('#modals').children().should('have.length', 0);
+    cy.get(SELECTORS.modals).children().should('have.length', 0);
   });
 
   it('Проверка модального окна: открытие', function () {
     cy.contains('Соус фирменный Space Sauce').click();
-    cy.get('#modals').children().should('have.length', 2);
-    cy.get('#modals').contains('Соус фирменный Space Sauce');
+    cy.get(SELECTORS.modals).children().should('have.length', 2);
+    cy.get(SELECTORS.modals).contains('Соус фирменный Space Sauce');
   });
 
   it('Проверка модального окна: закрытие по кнопке', function () {
     cy.contains('Соус фирменный Space Sauce').click();
-    cy.get('#modals').find('button').click();
-    cy.get('#modals').children().should('have.length', 0);
+    cy.get(SELECTORS.modals).find('button').click();
+    cy.get(SELECTORS.modals).children().should('have.length', 0);
   });
 
   it('Проверка модального окна: закрытие по esc', function () {
     cy.contains('Соус фирменный Space Sauce').click();
     cy.get('body').type('{esc}');
-    cy.get('#modals').children().should('have.length', 0);
+    cy.get(SELECTORS.modals).children().should('have.length', 0);
   });
 
   it('Проверка модального окна: закрытие по overlay click', function () {
     cy.contains('Соус фирменный Space Sauce').click();
-    cy.get('#overlay').debug();
-    cy.get('#overlay').click({ force: true });
-    cy.get('#modals').children().should('have.length', 0);
+    cy.get(SELECTORS.overlay).debug();
+    cy.get(SELECTORS.overlay).click({ force: true });
+    cy.get(SELECTORS.modals).children().should('have.length', 0);
   });
 });
 
@@ -73,7 +79,7 @@ describe('Тесты e2e оформление заказа', function () {
     cy.intercept('POST', '/api/auth/login', { fixture: 'user.json' });
     cy.intercept('GET', '/api/auth/user', { fixture: 'user.json' });
     cy.intercept('POST', '/api/orders', { fixture: 'order.json' });
-    cy.visit(testUrl);
+    cy.visit('/');
     cy.setCookie('accessToken', 'accessToken');
     window.localStorage.setItem('refreshToken', 'refreshToken');
   });
@@ -84,19 +90,19 @@ describe('Тесты e2e оформление заказа', function () {
   });
 
   it('Тестируем оформление заказа', function () {
-    cy.get(`[data-cy=${'buns'}]`).as('buns');
-    cy.get('[data-cy=mains]').as('mains');
-    cy.get('[data-cy=sauces]').as('sauces');
+    cy.get(SELECTORS.buns).as('buns');
+    cy.get(SELECTORS.mains).as('mains');
+    cy.get(SELECTORS.sauces).as('sauces');
 
     cy.get('@buns').contains('Добавить').click();
     cy.get('@mains').contains('Добавить').click();
     cy.get('@sauces').contains('Добавить').click();
 
     cy.contains('Оформить заказ').click();
-    cy.get('#modals').children().should('have.length', 2);
-    cy.get('#modals').find('h2').contains(41975);
+    cy.get(SELECTORS.modals).children().should('have.length', 2);
+    cy.get(SELECTORS.modals).find('h2').contains(41975);
     cy.get('body').type('{esc}');
-    cy.get('#modals').children().should('have.length', 0);
+    cy.get(SELECTORS.modals).children().should('have.length', 0);
 
     cy.get('.text_type_main-default').contains('Выберите булки');
     cy.get('.text_type_main-default').contains('Выберите начинку');
